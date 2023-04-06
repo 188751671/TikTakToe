@@ -46,7 +46,7 @@ printBoard board =
          printCells (take 3 board)
          printCells (take 3 (drop 3 board))
          printCells (drop 6 board)
-         putStrLn "please, type 0-8 corresponding the 9 boxes"
+         putStrLn "0-8 corresponding the 9 boxes"
 
 
 printCells :: Board -> IO ()
@@ -154,7 +154,6 @@ botPlayer (x_or_o,input_C,output_C) = do
 -- 7.
 gameManager :: Board -> Bool -> Player -> Bool -> Player -> Bool -> IO()
 gameManager board whosTurn (roleA, inputA,outputA) is_playerA_Bot (roleB, inputB,outputB) is_playerB_Bot= do
-   --printBoard board
 
    if whosTurn then do
       writeChan inputA $ Invitation board
@@ -166,12 +165,11 @@ gameManager board whosTurn (roleA, inputA,outputA) is_playerA_Bot (roleB, inputB
       MoveMsg move <- readChan outputA
       case isMoveLegal board move of
          Just newBoard -> do
-            --printBoard newBoard
             case getOutcome newBoard of
                Just outcome -> do
                   case outcome of
-                     Win _ -> putStrLn "PlayerA Won"  >>  exitWith ExitSuccess
-                     Draw  -> putStrLn "---Draw---"  >>  exitWith ExitSuccess
+                     Win _ -> printBoard newBoard >> putStrLn "PlayerA Won" >> exitWith ExitSuccess
+                     Draw  -> printBoard newBoard >> putStrLn "---Draw---"  >> exitWith ExitSuccess
                Nothing -> 
                   gameManager newBoard (not whosTurn) (roleA, inputA,outputA) is_playerA_Bot (roleB, inputB,outputB) is_playerB_Bot -- Game continues
          Nothing       -> error "PlayerA is cheating, inputing invalid Move"
@@ -186,12 +184,11 @@ gameManager board whosTurn (roleA, inputA,outputA) is_playerA_Bot (roleB, inputB
       MoveMsg move <- readChan outputB
       case isMoveLegal board move of
          Just newBoard -> do
-            --printBoard newBoard
             case getOutcome newBoard of
                Just outcome -> do
                   case outcome of
-                     Win _ -> putStrLn "PlayerB Won"  >>  exitWith ExitSuccess
-                     Draw  -> putStrLn "---Draw---"  >>  exitWith ExitSuccess
+                     Win _ -> printBoard newBoard >> putStrLn "PlayerB Won"  >> exitWith ExitSuccess
+                     Draw  -> printBoard newBoard >> putStrLn "---Draw---"  >> exitWith ExitSuccess
                Nothing -> 
                   gameManager newBoard (not whosTurn) (roleA, inputA,outputA) is_playerA_Bot (roleB, inputB,outputB) is_playerB_Bot -- Game continues
          Nothing       -> error "PlayerB is cheating, inputing invalid Move"
@@ -206,10 +203,8 @@ gameStart is_playerA_Bot is_playerB_Bot = do
 
                                              if is_playerA_Bot 
                                                 then do
-                                                   --forkIO (botPlayer playerA)
                                                    putStrLn "PlayerA - Bot    running"
                                                 else do
-                                                   --forkIO (humanPlayer playerA)
                                                    putStrLn "PlayerA - Human  running"
 
                                              inputB  <- newChan :: IO (Chan Msg)
@@ -218,10 +213,8 @@ gameStart is_playerA_Bot is_playerB_Bot = do
 
                                              if is_playerB_Bot 
                                                 then do
-                                                   --forkIO (botPlayer playerB)
                                                    putStrLn "PlayerB - Bot    running"
                                                 else do
-                                                   --forkIO (humanPlayer playerB)
                                                    putStrLn "PlayerB - Human  running"
                                              
                                              putStrLn "gameManager running"
@@ -229,6 +222,9 @@ gameStart is_playerA_Bot is_playerB_Bot = do
 
 
 {-
+-----------
+Test Code:
+-----------
 
 :{
 do 
